@@ -1,0 +1,166 @@
+name: Predictor CI/CD
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  PYTHON_VERSION: "3.13"
+  VERSION_CONFIG: config/artifact-version.yml
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+
+      - name: Compile source
+        run: python -m compileall app scripts
+
+      - name: Build tournament seed database
+        run: python scripts/build_klement_db.py
+
+      - name: Smoke test predictor DB and model
+        run: |
+          python - <<'PY'
+          import sqlite3
+          from app.klement_model import match_probability
+          from app.models import KlementTeam
+
+          conn = sqlite3.connect("data/klement_world_cup_2026.db")
+          assert conn.execute("select count(*) from teams").fetchone()[0] == 48
+          assert conn.execute("select count(*) from matches").fetchone()[0] == 104
+          conn.close()
+
+          team_a = KlementTeam(country="Argentina", gdp_per_capita_usd=13730, population=45800000, football_popularity=0.9, avg_temp_c=14.8, fifa_rank=1)
+          team_b = KlementTeam(country="France", gdp_per_capita_usd=44400, population=68200000, football_popularity=0.75, avg_temp_c=11.7, fifa_rank=2)
+          result = match_probability(team_a, team_b)
+          assert 0 < result["team_a_win_probability"] < 1
+          PY
+
+  package:
+    name: Package artifact
+    runs-on: ubuntu-latest
+    needs: validate
+
+    outputs:
+      app_name: ${{ steps.version.outputs.app_name }}
+      artifact_name: ${{ steps.version.outputs.artifact_name }}
+      build_kind: ${{ steps.version.outputs.build_kind }}
+      release_enabled: ${{ steps.version.outputs.release_enabled }}
+      release_tag: ${{ steps.version.outputs.release_tag }}
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+
+      - name: Resolve artifact version
+        id: version
+        run: python scripts/resolve_artifact_version.py --config "${VERSION_CONFIG}"
+
+      - name: Build tournament seed database
+        run: python scripts/build_klement_db.py
+
+      - name: Create distributable archive
+        run: python scripts/package_predictor.py --artifact-name "${{ steps.version.outputs.artifact_name }}"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.version.outputs.artifact_name }}
+          path: dist/${{ steps.version.outputs.artifact_name }}.zip
+          if-no-files-found: error
+          retention-days: ${{ steps.version.outputs.build_kind == 'RELEASE' && 90 || 30 }}
+
+  release:
+    name: Publish release
+    runs-on: ubuntu-latest
+    needs: package
+    if: needs.package.outputs.release_enabled == 'true' && github.event_name != 'pull_request'
+
+    steps:
+      - name: Download packaged artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.package.outputs.artifact_name }}
+          path: dist
+
+      - name: Publish GitHub release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP_NAME: ${{ needs.package.outputs.app_name }}
+          ARTIFACT_NAME: ${{ needs.package.outputs.artifact_name }}
+          RELEASE_TAG: ${{ needs.package.outputs.release_tag }}
+          VERSION: ${{ needs.package.outputs.version }}
+        run: |
+          gh release create "${RELEASE_TAG}" "dist/${ARTIFACT_NAME}.zip" \
+            --title "${APP_NAME} ${VERSION}" \
+            --notes "Automated release for ${APP_NAME} ${VERSION}." \
+            --target "${GITHUB_SHA}"
+
+  bump-next-version:
+    name: Bump next release version
+    runs-on: ubuntu-latest
+    needs:
+      - package
+      - release
+    if: needs.package.outputs.release_enabled == 'true' && github.event_name == 'push' && github.ref_name == 'main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install YAML dependency
+        run: python -m pip install PyYAML
+
+      - name: Bump patch version
+        run: python scripts/bump_artifact_version.py --config "${VERSION_CONFIG}"
+
+      - name: Commit next version
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${VERSION_CONFIG}"
+          git commit -m "Bump next predictor artifact version [skip ci]"
+          git push

@@ -1,0 +1,20 @@
+roles:
+  viewer:
+    allowed_job_types: [inventory]
+    allowed_workflows: []
+    can_approve: false
+  operator:
+    allowed_job_types: [inventory, command, playbook]
+    allowed_workflows: [goal]
+    can_approve: true
+  admin:
+    allowed_job_types: [inventory, command, playbook]
+    allowed_workflows: [goal]
+    can_approve: true
+targets:
+  local:
+    allowed_actions: [read, validate, restart, patch, package]
+  local-win:
+    allowed_actions: [read, validate, restart, patch]
+  demo-ssh:
+    allowed_actions: [read, validate]

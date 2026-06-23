@@ -1,0 +1,9 @@
+services:
+  nginx:
+    depends_on: []
+  my-api:
+    depends_on: [db, redis]
+  db:
+    depends_on: []
+  redis:
+    depends_on: []

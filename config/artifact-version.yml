@@ -1,0 +1,9 @@
+artifact:
+  name: predictor
+  release_branch: main
+  tag_prefix: v
+  version:
+    major: 0
+    minor: 1
+    patch: 0
+  snapshot_suffix: SNAPSHOT

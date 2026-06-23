@@ -1,0 +1,14 @@
+targets:
+  local:
+    type: local
+    tags: [local, linux]
+  local-win:
+    type: local
+    tags: [windows, local]
+  demo-ssh:
+    type: ssh
+    host: 127.0.0.1
+    user: root
+    port: 22
+    secret_profile: demo-ssh
+    tags: [ssh, linux]

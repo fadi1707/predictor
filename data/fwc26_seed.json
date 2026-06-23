@@ -1,0 +1,55 @@
+{
+  "tournament": {
+    "id": "fwc26",
+    "name": "FIFA World Cup 2026",
+    "notes": "Seeded from the two user-supplied PDFs. Economic/model inputs are nullable because the PDFs provide tournament structure, not GDP, population, temperature, or ranking data."
+  },
+  "sources": [
+    {
+      "name": "World Cup 2026 predictor worksheet",
+      "path": "source_pdfs/a7e84ad7-6a44-405f-953f-8e3d027b6898.pdf"
+    },
+    {
+      "name": "FWC26 Match Schedule v17 10 April 2026",
+      "path": "source_pdfs/FWC26 Match Schedule_v17_10042026_EN.pdf"
+    }
+  ],
+  "groups": {
+    "A": [["Mexico", "MEX"], ["South Africa", "RSA"], ["South Korea", "KOR"], ["Czech Rep.", "CZE"]],
+    "B": [["Canada", "CAN"], ["Bosnia-Herzeg.", "BIH"], ["Qatar", "QAT"], ["Switzerland", "SUI"]],
+    "C": [["Brazil", "BRA"], ["Morocco", "MAR"], ["Haiti", "HAI"], ["Scotland", "SCO"]],
+    "D": [["United States", "USA"], ["Paraguay", "PAR"], ["Australia", "AUS"], ["Turkey", "TUR"]],
+    "E": [["Germany", "GER"], ["Curacao", "CUW"], ["Ivory Coast", "CIV"], ["Ecuador", "ECU"]],
+    "F": [["Netherlands", "NED"], ["Japan", "JPN"], ["Sweden", "SWE"], ["Tunisia", "TUN"]],
+    "G": [["Belgium", "BEL"], ["Egypt", "EGY"], ["Iran", "IRN"], ["New Zealand", "NZL"]],
+    "H": [["Spain", "ESP"], ["Cape Verde", "CPV"], ["Saudi Arabia", "KSA"], ["Uruguay", "URU"]],
+    "I": [["France", "FRA"], ["Senegal", "SEN"], ["Iraq", "IRQ"], ["Norway", "NOR"]],
+    "J": [["Argentina", "ARG"], ["Algeria", "ALG"], ["Austria", "AUT"], ["Jordan", "JOR"]],
+    "K": [["Portugal", "POR"], ["DR Congo", "COD"], ["Uzbekistan", "UZB"], ["Colombia", "COL"]],
+    "L": [["England", "ENG"], ["Croatia", "CRO"], ["Ghana", "GHA"], ["Panama", "PAN"]]
+  },
+  "group_matches": [
+    ["A", "Jun 11", "8pm", "RSA", "MEX"], ["A", "Jun 12", "3am", "CZE", "KOR"], ["A", "Jun 18", "5pm", "RSA", "CZE"], ["A", "Jun 19", "2am", "KOR", "MEX"], ["A", "Jun 25", "2am", "KOR", "RSA"], ["A", "Jun 25", "2am", "MEX", "CZE"],
+    ["B", "Jun 12", "8pm", "BIH", "CAN"], ["B", "Jun 13", "8pm", "SUI", "QAT"], ["B", "Jun 18", "8pm", "BIH", "SUI"], ["B", "Jun 18", "11pm", "QAT", "CAN"], ["B", "Jun 24", "8pm", "CAN", "SUI"], ["B", "Jun 24", "8pm", "QAT", "BIH"],
+    ["C", "Jun 13", "11pm", "MAR", "BRA"], ["C", "Jun 14", "2am", "SCO", "HAI"], ["C", "Jun 19", "11pm", "MAR", "SCO"], ["C", "Jun 20", "1.30am", "HAI", "BRA"], ["C", "Jun 24", "11pm", "HAI", "MAR"], ["C", "Jun 24", "11pm", "BRA", "SCO"],
+    ["D", "Jun 13", "2am", "PAR", "USA"], ["D", "Jun 14", "5am", "TUR", "AUS"], ["D", "Jun 19", "8pm", "AUS", "USA"], ["D", "Jun 20", "4am", "PAR", "TUR"], ["D", "Jun 26", "3am", "USA", "TUR"], ["D", "Jun 26", "3am", "AUS", "PAR"],
+    ["E", "Jun 14", "6pm", "CUW", "GER"], ["E", "Jun 15", "12am", "ECU", "CIV"], ["E", "Jun 20", "9pm", "CIV", "GER"], ["E", "Jun 21", "1am", "CUW", "ECU"], ["E", "Jun 25", "9pm", "CIV", "CUW"], ["E", "Jun 25", "9pm", "GER", "ECU"],
+    ["F", "Jun 14", "9pm", "JPN", "NED"], ["F", "Jun 15", "3am", "TUN", "SWE"], ["F", "Jun 20", "6pm", "SWE", "NED"], ["F", "Jun 21", "5am", "JPN", "TUN"], ["F", "Jun 26", "12am", "SWE", "JPN"], ["F", "Jun 26", "12am", "NED", "TUN"],
+    ["G", "Jun 15", "8pm", "EGY", "BEL"], ["G", "Jun 16", "2am", "NZL", "IRN"], ["G", "Jun 21", "8pm", "IRN", "BEL"], ["G", "Jun 22", "2am", "EGY", "NZL"], ["G", "Jun 27", "4am", "IRN", "EGY"], ["G", "Jun 27", "4am", "BEL", "NZL"],
+    ["H", "Jun 15", "5pm", "CPV", "ESP"], ["H", "Jun 15", "11pm", "URU", "KSA"], ["H", "Jun 21", "5pm", "KSA", "ESP"], ["H", "Jun 21", "11pm", "CPV", "URU"], ["H", "Jun 27", "1am", "KSA", "CPV"], ["H", "Jun 27", "1am", "ESP", "URU"],
+    ["I", "Jun 16", "8pm", "SEN", "FRA"], ["I", "Jun 16", "11pm", "NOR", "IRQ"], ["I", "Jun 22", "10pm", "IRQ", "FRA"], ["I", "Jun 23", "1am", "SEN", "NOR"], ["I", "Jun 26", "8pm", "FRA", "NOR"], ["I", "Jun 26", "8pm", "IRQ", "SEN"],
+    ["J", "Jun 17", "2am", "ALG", "ARG"], ["J", "Jun 17", "5am", "JOR", "AUT"], ["J", "Jun 22", "6pm", "AUT", "ARG"], ["J", "Jun 23", "4am", "ALG", "JOR"], ["J", "Jun 28", "3am", "AUT", "ALG"], ["J", "Jun 28", "3am", "ARG", "JOR"],
+    ["K", "Jun 17", "6pm", "COD", "POR"], ["K", "Jun 18", "3am", "COL", "UZB"], ["K", "Jun 23", "6pm", "UZB", "POR"], ["K", "Jun 24", "3am", "COD", "COL"], ["K", "Jun 28", "12.30am", "POR", "COL"], ["K", "Jun 28", "12.30am", "UZB", "COD"],
+    ["L", "Jun 17", "9pm", "CRO", "ENG"], ["L", "Jun 18", "12am", "PAN", "GHA"], ["L", "Jun 23", "9pm", "GHA", "ENG"], ["L", "Jun 24", "12am", "CRO", "PAN"], ["L", "Jun 27", "10pm", "ENG", "PAN"], ["L", "Jun 27", "10pm", "GHA", "CRO"]
+  ],
+  "knockout_matches": [
+    [73, "Round of 32", "Jun 28", "8pm", "2B", "2A"], [74, "Round of 32", "Jun 29", "9.30pm", "1E", "3rd A/B/C/D/F"], [75, "Round of 32", "Jun 30", "2am", "2C", "1F"], [76, "Round of 32", "Jun 29", "6pm", "2F", "1C"],
+    [77, "Round of 32", "Jun 30", "10pm", "1I", "3rd C/D/F/G/H"], [78, "Round of 32", "Jun 30", "6pm", "2I", "2E"], [79, "Round of 32", "Jul 1", "2am", "1A", "3rd C/E/F/H/I"], [80, "Round of 32", "Jul 1", "5pm", "1L", "3rd E/H/I/J/K"],
+    [81, "Round of 32", "Jul 2", "1am", "1D", "3rd B/E/F/I/J"], [82, "Round of 32", "Jul 1", "9pm", "1G", "3rd A/E/H/I/J"], [83, "Round of 32", "Jul 3", "12am", "2L", "2K"], [84, "Round of 32", "Jul 2", "8pm", "1H", "2J"],
+    [85, "Round of 32", "Jul 3", "4am", "1B", "3rd E/F/G/I/J"], [86, "Round of 32", "Jul 3", "11pm", "2H", "1J"], [87, "Round of 32", "Jul 4", "2.30am", "1K", "3rd D/E/I/J/L"], [88, "Round of 32", "Jul 3", "7pm", "2G", "2D"],
+    [89, "Round of 16", null, "17:00", "W74", "W77"], [90, "Round of 16", null, "13:00", "W73", "W75"], [91, "Round of 16", null, "16:00", "W76", "W78"], [92, "Round of 16", null, "20:00", "W79", "W80"],
+    [93, "Round of 16", null, "15:00", "W83", "W84"], [94, "Round of 16", null, "20:00", "W81", "W82"], [95, "Round of 16", null, "12:00", "W86", "W88"], [96, "Round of 16", null, "16:00", "W85", "W87"],
+    [97, "Quarter-final", null, "16:00", "W89", "W90"], [98, "Quarter-final", null, "15:00", "W93", "W94"], [99, "Quarter-final", null, "17:00", "W91", "W92"], [100, "Quarter-final", null, "21:00", "W95", "W96"],
+    [101, "Semi-final", "Jul 14", "8pm", "W97", "W98"], [102, "Semi-final", "Jul 15", "8pm", "W99", "W100"], [103, "Bronze", "Jul 18", "10pm", "L101", "L102"], [104, "Final", "Jul 19", "8pm", "W101", "W102"]
+  ]
+}
