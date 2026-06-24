@@ -160,8 +160,10 @@ jobs:
 
       - name: Commit next version
         run: |
+          git init
+          git remote add origin https://github.com/${{ github.repository }}.git
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "${VERSION_CONFIG}"
           git commit -m "Bump next predictor artifact version [skip ci]"
-          git push
+          git push origin HEAD:${{ github.ref_name }}
