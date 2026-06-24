@@ -113,6 +113,11 @@ jobs:
     if: needs.package.outputs.release_enabled == 'true' && github.event_name != 'pull_request'
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Download packaged artifact
         uses: actions/download-artifact@v4
         with:
@@ -128,6 +133,7 @@ jobs:
           VERSION: ${{ needs.package.outputs.version }}
         run: |
           gh release create "${RELEASE_TAG}" "dist/${ARTIFACT_NAME}.zip" \
+            --repo "${GITHUB_REPOSITORY}" \
             --title "${APP_NAME} ${VERSION}" \
             --notes "Automated release for ${APP_NAME} ${VERSION}." \
             --target "${GITHUB_SHA}"
