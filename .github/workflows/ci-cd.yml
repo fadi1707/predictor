@@ -61,6 +61,10 @@ jobs:
           result = match_probability(team_a, team_b)
           assert 0 < result["team_a_win_probability"] < 1
 
+          from app.klement_published_forecast import load_klement_2026_forecast
+          published = load_klement_2026_forecast()
+          assert published["most_probable_winner"]["country"] == "Netherlands"
+
           winner = predict_fwc26_winner(simulations=25, seed=7)
           assert winner["most_probable_winner"]
           PY

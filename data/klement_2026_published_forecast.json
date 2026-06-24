@@ -1,0 +1,130 @@
+{
+  "source": {
+    "name": "FIFA World Cup Predictions 2026",
+    "publisher": "Panmure Liberum",
+    "author": "Joachim Klement",
+    "date": "2026-04-09",
+    "path": "source_pdfs/strategy-fifa-world-cup-predictions-2026.pdf",
+    "note": "The PDF describes the model as proprietary and does not publish regression coefficients. This file captures the exact published 2026 forecast outputs."
+  },
+  "model_disclosure": {
+    "exact_formula_available": false,
+    "published_inputs": [
+      "GDP per capita",
+      "population size adjusted for football culture",
+      "average annual temperature",
+      "host advantage",
+      "FIFA ranking points",
+      "luck component"
+    ],
+    "reported_explained_variation": 0.55,
+    "reported_luck_component": 0.45
+  },
+  "group_advancement_probabilities": {
+    "A": [
+      ["Germany", "GER", 0.93],
+      ["Ecuador", "ECU", 0.65],
+      ["Ivory Coast", "CIV", 0.37],
+      ["Curacao", "CUW", 0.05]
+    ],
+    "B": [
+      ["Belgium", "BEL", 0.85],
+      ["Iran", "IRN", 0.57],
+      ["Egypt", "EGY", 0.43],
+      ["New Zealand", "NZL", 0.15]
+    ],
+    "C": [
+      ["Netherlands", "NED", 0.73],
+      ["Japan", "JPN", 0.58],
+      ["Sweden", "SWE", 0.41],
+      ["Tunisia", "TUN", 0.28]
+    ],
+    "D": [
+      ["Argentina", "ARG", 0.91],
+      ["Austria", "AUT", 0.52],
+      ["Algeria", "ALG", 0.40],
+      ["Jordan", "JOR", 0.17]
+    ],
+    "E": [
+      ["France", "FRA", 0.85],
+      ["Senegal", "SEN", 0.48],
+      ["Norway", "NOR", 0.41],
+      ["Iraq", "IRQ", 0.25]
+    ],
+    "F": [
+      ["Portugal", "POR", 0.77],
+      ["Colombia", "COL", 0.73],
+      ["Uzbekistan", "UZB", 0.28],
+      ["DR Congo", "COD", 0.23]
+    ],
+    "G": [
+      ["England", "ENG", 0.89],
+      ["Croatia", "CRO", 0.70],
+      ["Panama", "PAN", 0.36],
+      ["Ghana", "GHA", 0.05]
+    ],
+    "H": [
+      ["Spain", "ESP", 0.99],
+      ["Uruguay", "URU", 0.63],
+      ["Saudi Arabia", "KSA", 0.25],
+      ["Cape Verde", "CPV", 0.13]
+    ]
+  },
+  "best_third_place_qualifiers": [
+    "Mexico",
+    "Scotland",
+    "Australia",
+    "South Korea",
+    "Brazil",
+    "Turkey",
+    "Switzerland",
+    "Ivory Coast"
+  ],
+  "knockout_rounds": {
+    "round_of_32": [
+      ["Germany", "USA", "Germany"],
+      ["France", "Sweden", "France"],
+      ["Czechia", "Canada", "Canada"],
+      ["Netherlands", "Morocco", "Netherlands"],
+      ["Colombia", "Croatia", "Croatia"],
+      ["Spain", "Austria", "Spain"],
+      ["Australia", "Algeria", "Australia"],
+      ["Belgium", "Mexico", "Belgium"],
+      ["Brazil", "Japan", "Japan"],
+      ["Ecuador", "Senegal", "Senegal"],
+      ["South Korea", "Scotland", "South Korea"],
+      ["England", "Norway", "England"],
+      ["Argentina", "Uruguay", "Argentina"],
+      ["Turkey", "Iran", "Turkey"],
+      ["Switzerland", "Egypt", "Switzerland"],
+      ["Portugal", "Ivory Coast", "Portugal"]
+    ],
+    "round_of_16": [
+      ["Germany", "France", "France"],
+      ["Canada", "Netherlands", "Netherlands"],
+      ["Croatia", "Spain", "Spain"],
+      ["Australia", "Belgium", "Belgium"],
+      ["Japan", "Senegal", "Japan"],
+      ["South Korea", "England", "England"],
+      ["Argentina", "Turkey", "Argentina"],
+      ["Switzerland", "Portugal", "Portugal"]
+    ],
+    "quarter_finals": [
+      ["France", "Netherlands", "Netherlands"],
+      ["Spain", "Belgium", "Spain"],
+      ["Japan", "England", "England"],
+      ["Argentina", "Portugal", "Portugal"]
+    ],
+    "semi_finals": [
+      ["Netherlands", "Spain", "Netherlands"],
+      ["England", "Portugal", "Portugal"]
+    ],
+    "final": [
+      ["Netherlands", "Portugal", "Netherlands"]
+    ]
+  },
+  "winner": {
+    "country": "Netherlands",
+    "fifa_code": "NED"
+  }
+}

@@ -1,15 +1,14 @@
 # Predictor
 
-Predictor is a FastAPI-based Joachim Klement-style FIFA World Cup prediction
-engine. It includes a seeded FIFA World Cup 2026 tournament database generated
-from the supplied tournament PDFs, plus endpoints for single-match probability
-checks and Monte Carlo knockout simulations.
+Predictor is a FastAPI-based FIFA World Cup prediction service. It includes
+Joachim Klement's published 2026 World Cup forecast from the Panmure Liberum
+strategy note, plus a separate transparent Klement-style Monte Carlo simulator
+for experimentation.
 
-Klement's exact private coefficients are not public. This implementation uses a
-transparent approximation based on the public Hoffmann, Ging, and Ramasamy
-framework: FIFA ranking, football-adjusted population, GDP per capita with
-diminishing returns around $60,000, temperature fit around 14 C, host advantage,
-and a Monte Carlo luck component.
+Klement's exact private regression coefficients are not public in the PDF. The
+default endpoint therefore returns his exact published 2026 forecast output:
+Netherlands over Portugal. The simulation mode remains an approximation based on
+the public Hoffmann, Ging, and Ramasamy-style factors.
 
 ## Run Locally
 
@@ -82,14 +81,17 @@ population, temperature, and FIFA rank are populated from
 `data/fwc26_model_inputs.json`, which is a starter dataset for running the
 model end-to-end.
 
-Run the full seeded World Cup simulation from the DB:
+Return Klement's exact published 2026 forecast:
 
 ```bash
-curl "http://127.0.0.1:8080/api/klement/fwc26/winner?simulations=10000&seed=7"
+curl "http://127.0.0.1:8080/api/klement/fwc26/winner"
 ```
 
-The response includes the most probable winner, title odds, final appearance
-odds, and normalized model scores for every team.
+Run the separate approximation/simulation mode from the DB:
+
+```bash
+curl "http://127.0.0.1:8080/api/klement/fwc26/winner?mode=simulation&simulations=10000&seed=7"
+```
 
 ## CI/CD
 
