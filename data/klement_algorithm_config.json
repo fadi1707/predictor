@@ -1,0 +1,38 @@
+{
+  "algorithm_id": "klement_reconstruction_public_v1",
+  "algorithm_name": "Klement reconstruction from public disclosures",
+  "description": "Public reconstruction using the Hoffmann/Ging/Ramasamy OLS equation cited by Klement, plus configurable FIFA-form and luck layers. Klement's private coefficients are not published.",
+  "sources": [
+    "source_pdfs/strategy-fifa-world-cup-predictions-2026.pdf",
+    "Hoffmann, Ging, Ramasamy (2002), The Socio-Economic Determinants of International Soccer Performance"
+  ],
+  "score_output": {
+    "mode": "raw_divisor",
+    "raw_score_divisor": 1000.0
+  },
+  "world_population": 8100000000,
+  "deterministic_share": 0.55,
+  "luck_share": 0.45,
+  "match_probability": {
+    "logistic_scale": 4.0,
+    "draw_band": 0.045,
+    "luck_sigma_divisor": 3.0
+  },
+  "coefficients": {
+    "intercept": 492.5865,
+    "gdp_per_capita": 0.0107,
+    "gdp_per_capita_squared": -0.000000245,
+    "temperature_deviation_squared": -0.4895,
+    "host": 81.051,
+    "football_culture_population_share": 8587.4616,
+    "fifa_rank_score": 250.0,
+    "fifa_points": 0.0
+  },
+  "transforms": {
+    "temperature_target_c": 14.0,
+    "fifa_member_count": 211,
+    "population_share_mode": "world_population",
+    "football_culture_proxy": "football_popularity",
+    "fifa_points_fallback": "rank_score"
+  }
+}

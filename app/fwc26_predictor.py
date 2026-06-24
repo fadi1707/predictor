@@ -3,7 +3,7 @@ import sqlite3
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from app.klement_model import LUCK_SHARE, MODEL_SHARE, normalize_teams
+from app.klement_model import DEFAULT_CONFIG, normalize_teams
 from app.models import KlementTeam
 
 
@@ -24,7 +24,7 @@ def load_world_cup(db_path=DEFAULT_DB_PATH):
             """
             SELECT country, fifa_code, group_letter, group_position,
                    gdp_per_capita_usd, population, football_popularity,
-                   avg_temp_c, fifa_rank, is_host
+                   avg_temp_c, fifa_rank, fifa_points, is_host
             FROM teams
             ORDER BY group_letter, group_position
             """
@@ -65,6 +65,7 @@ def load_world_cup(db_path=DEFAULT_DB_PATH):
             football_popularity=row["football_popularity"],
             avg_temp_c=row["avg_temp_c"],
             fifa_rank=row["fifa_rank"],
+            fifa_points=row["fifa_points"],
             is_host=bool(row["is_host"]),
         )
         teams[row["fifa_code"]] = team
@@ -78,11 +79,11 @@ def load_world_cup(db_path=DEFAULT_DB_PATH):
     return teams, dict(group_members), group_matches, knockout_matches
 
 
-def _match_outcome(code_a, code_b, normalized, rng):
+def _match_outcome(code_a, code_b, normalized, rng, config):
     score_delta = normalized[code_a]["score"] - normalized[code_b]["score"]
-    luck = rng.gauss(0.0, LUCK_SHARE / 3.0)
-    outcome = (MODEL_SHARE * score_delta) + luck
-    draw_band = 0.045
+    luck = rng.gauss(0.0, config["luck_share"] / config["match_probability"]["luck_sigma_divisor"])
+    outcome = (config["deterministic_share"] * score_delta) + luck
+    draw_band = config["match_probability"]["draw_band"]
 
     if abs(outcome) <= draw_band:
         return "draw"
@@ -132,7 +133,7 @@ def _slot_to_code(slot, group_rankings, third_place_pool):
     return slot
 
 
-def _simulate_group_stage(group_members, group_matches, normalized, rng):
+def _simulate_group_stage(group_members, group_matches, normalized, rng, config):
     tables = {
         group: {
             code: {"code": code, "points": 0, "wins": 0, "losses": 0, "played": 0}
@@ -142,7 +143,7 @@ def _simulate_group_stage(group_members, group_matches, normalized, rng):
     }
 
     for match in group_matches:
-        outcome = _match_outcome(match["slot_a"], match["slot_b"], normalized, rng)
+        outcome = _match_outcome(match["slot_a"], match["slot_b"], normalized, rng, config)
         _record_group_result(tables[match["group_letter"]], match["slot_a"], match["slot_b"], outcome)
 
     rankings = {group: _sort_group(table, normalized) for group, table in tables.items()}
@@ -156,14 +157,14 @@ def _simulate_group_stage(group_members, group_matches, normalized, rng):
     return rankings, third_place_pool
 
 
-def _simulate_knockout(knockout_matches, group_rankings, third_place_pool, normalized, rng):
+def _simulate_knockout(knockout_matches, group_rankings, third_place_pool, normalized, rng, config):
     resolved = {}
     finalist_codes = []
 
     for match in knockout_matches:
         code_a = resolved.get(match["slot_a"], None) or _slot_to_code(match["slot_a"], group_rankings, third_place_pool)
         code_b = resolved.get(match["slot_b"], None) or _slot_to_code(match["slot_b"], group_rankings, third_place_pool)
-        winner = _match_outcome(code_a, code_b, normalized, rng)
+        winner = _match_outcome(code_a, code_b, normalized, rng, config)
         if winner == "draw":
             winner = code_a if normalized[code_a]["score"] >= normalized[code_b]["score"] else code_b
         loser = code_b if winner == code_a else code_a
@@ -177,10 +178,11 @@ def _simulate_knockout(knockout_matches, group_rankings, third_place_pool, norma
     raise ValueError("Final match was not found in knockout schedule.")
 
 
-def predict_fwc26_winner(simulations=10000, seed=None, db_path=DEFAULT_DB_PATH):
+def predict_fwc26_winner(simulations=10000, seed=None, db_path=DEFAULT_DB_PATH, config=None):
+    config = config or DEFAULT_CONFIG
     teams, group_members, group_matches, knockout_matches = load_world_cup(db_path)
     rng = random.Random(seed)
-    normalized_by_country = normalize_teams(list(teams.values()))
+    normalized_by_country = normalize_teams(list(teams.values()), config=config)
     normalized = {
         code: normalized_by_country[team.country]
         for code, team in teams.items()
@@ -190,13 +192,14 @@ def predict_fwc26_winner(simulations=10000, seed=None, db_path=DEFAULT_DB_PATH):
     final_appearances = Counter()
 
     for _ in range(simulations):
-        group_rankings, third_place_pool = _simulate_group_stage(group_members, group_matches, normalized, rng)
+        group_rankings, third_place_pool = _simulate_group_stage(group_members, group_matches, normalized, rng, config)
         champion, finalists = _simulate_knockout(
             knockout_matches,
             group_rankings,
             dict(third_place_pool),
             normalized,
             rng,
+            config,
         )
         titles[champion] += 1
         final_appearances.update(finalists)
@@ -216,6 +219,10 @@ def predict_fwc26_winner(simulations=10000, seed=None, db_path=DEFAULT_DB_PATH):
     return {
         "simulations": simulations,
         "seed": seed,
+        "algorithm": {
+            "id": config["algorithm_id"],
+            "name": config["algorithm_name"],
+        },
         "most_probable_winner": champion_odds[0] if champion_odds else None,
         "champion_odds": champion_odds,
         "final_odds": final_odds,

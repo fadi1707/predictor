@@ -40,6 +40,7 @@ POST /api/klement/match
 POST /api/klement/tournament
 GET  /api/klement/fwc26/winner
 POST /api/klement/fwc26/winner
+GET  /api/klement/model/config
 GET  /api/health/local
 ```
 
@@ -114,4 +115,28 @@ Local package build:
 ```bash
 python scripts/resolve_artifact_version.py --config config/artifact-version.yml
 python scripts/package_predictor.py --artifact-name predictor-local
+```
+
+## Updating The Algorithm
+
+The simulation algorithm is intentionally data/config driven:
+
+```text
+data/klement_algorithm_config.json
+data/fwc26_model_inputs.json
+```
+
+Update `klement_algorithm_config.json` when better coefficients, FIFA-points
+transforms, luck settings, or probability mappings become available. Update
+`fwc26_model_inputs.json` when team-level GDP, population, temperature, FIFA
+ranking, FIFA points, or football-culture inputs change. Then rebuild:
+
+```bash
+python scripts/build_klement_db.py
+```
+
+Inspect the active algorithm:
+
+```bash
+curl "http://127.0.0.1:8080/api/klement/model/config"
 ```

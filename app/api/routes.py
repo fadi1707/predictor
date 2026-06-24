@@ -5,7 +5,7 @@ from app.execution import run_on_target
 from app.inventory import discover_target, health_model
 from app.job_engine import process_job, resume_job_from_approval
 from app.fwc26_predictor import predict_fwc26_winner
-from app.klement_model import match_probability, simulate_knockout_tournament
+from app.klement_model import load_algorithm_config, match_probability, simulate_knockout_tournament
 from app.klement_published_forecast import load_klement_2026_forecast
 from app.models import *
 from app.observability import get_metrics
@@ -118,6 +118,10 @@ def klement_tournament(req: KlementTournamentRequest):
         return simulate_knockout_tournament(req.teams, req.simulations, req.seed)
     except ValueError as exc:
         raise HTTPException(400, str(exc))
+
+@router.get("/api/klement/model/config")
+def klement_model_config():
+    return load_algorithm_config()
 
 @router.get("/api/klement/fwc26/winner")
 def klement_fwc26_winner(mode: str = "published", simulations: int = 10000, seed: int | None = None):

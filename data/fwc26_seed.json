@@ -2,7 +2,7 @@
   "tournament": {
     "id": "fwc26",
     "name": "FIFA World Cup 2026",
-    "notes": "Seeded from the two user-supplied PDFs. Economic/model inputs are nullable because the PDFs provide tournament structure, not GDP, population, temperature, or ranking data."
+    "notes": "Seeded from the supplied tournament PDFs. Economic/model inputs are maintained separately in data/fwc26_model_inputs.json."
   },
   "sources": [
     {

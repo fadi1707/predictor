@@ -1,95 +1,124 @@
+import json
 import math
 import random
 from collections import Counter
+from pathlib import Path
 
 
-DEFAULT_WEIGHTS = {
-    "fifa_rank": 0.45,
-    "population_pool": 0.22,
-    "gdp_per_capita": 0.15,
-    "climate": 0.11,
-    "host": 0.07,
-}
-
-MODEL_SHARE = 0.55
-LUCK_SHARE = 0.45
-FIFA_MEMBER_COUNT = 211
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_CONFIG_PATH = ROOT / "data" / "klement_algorithm_config.json"
 
 
-def _gaussian_score(value, target, sigma):
-    return math.exp(-((value - target) ** 2) / (2 * sigma**2))
+def load_algorithm_config(path=DEFAULT_CONFIG_PATH):
+    with open(path, "r", encoding="utf-8") as handle:
+        return json.load(handle)
 
 
-def _wealth_score(gdp_per_capita_usd):
-    if gdp_per_capita_usd <= 0:
-        return 0.0
-    return _gaussian_score(math.log(gdp_per_capita_usd), math.log(60000), 0.9)
+DEFAULT_CONFIG = load_algorithm_config()
+MODEL_SHARE = DEFAULT_CONFIG["deterministic_share"]
+LUCK_SHARE = DEFAULT_CONFIG["luck_share"]
+FIFA_MEMBER_COUNT = DEFAULT_CONFIG["transforms"]["fifa_member_count"]
 
 
-def _climate_score(avg_temp_c):
-    return _gaussian_score(avg_temp_c, 14.0, 10.0)
+def _fifa_rank_score(fifa_rank, config):
+    member_count = config["transforms"]["fifa_member_count"]
+    bounded_rank = min(max(fifa_rank, 1), member_count)
+    return (member_count - bounded_rank + 1) / member_count
 
 
-def _fifa_rank_score(fifa_rank):
-    bounded_rank = min(max(fifa_rank, 1), FIFA_MEMBER_COUNT)
-    return (FIFA_MEMBER_COUNT - bounded_rank + 1) / FIFA_MEMBER_COUNT
+def _population_share(team, config):
+    return team.population / config["world_population"]
 
 
-def _population_pool_score(team, max_pool):
-    pool = max(team.population * team.football_popularity, 0)
-    if max_pool <= 0:
-        return 0.0
-    return math.log1p(pool) / math.log1p(max_pool)
+def _raw_strength(team, config):
+    coefficients = config["coefficients"]
+    transforms = config["transforms"]
+    temp_target = transforms["temperature_target_c"]
+    fifa_rank_score = _fifa_rank_score(team.fifa_rank, config)
+    fifa_points = team.fifa_points or 0.0
+    culture_population = team.football_popularity * _population_share(team, config)
+
+    terms = {
+        "intercept": coefficients["intercept"],
+        "gdp_per_capita": coefficients["gdp_per_capita"] * team.gdp_per_capita_usd,
+        "gdp_per_capita_squared": coefficients["gdp_per_capita_squared"] * (team.gdp_per_capita_usd**2),
+        "temperature_deviation_squared": coefficients["temperature_deviation_squared"]
+        * ((team.avg_temp_c - temp_target) ** 2),
+        "host": coefficients["host"] * (1.0 if team.is_host else 0.0),
+        "football_culture_population_share": coefficients["football_culture_population_share"] * culture_population,
+        "fifa_rank_score": coefficients["fifa_rank_score"] * fifa_rank_score,
+        "fifa_points": coefficients["fifa_points"] * fifa_points,
+    }
+    return sum(terms.values()), terms
 
 
-def normalize_teams(teams, weights=None):
-    weights = weights or DEFAULT_WEIGHTS
-    max_pool = max((t.population * t.football_popularity for t in teams), default=0)
+def normalize_teams(teams, weights=None, config=None):
+    config = config or DEFAULT_CONFIG
+    raw = {}
+    term_map = {}
+    for team in teams:
+        raw_score, terms = _raw_strength(team, config)
+        raw[team.country] = raw_score
+        term_map[team.country] = terms
+
+    score_output = config["score_output"]
+    min_score = min(raw.values(), default=0.0)
+    max_score = max(raw.values(), default=1.0)
+    spread = max_score - min_score
     normalized = {}
 
     for team in teams:
-        factors = {
-            "fifa_rank": _fifa_rank_score(team.fifa_rank),
-            "population_pool": _population_pool_score(team, max_pool),
-            "gdp_per_capita": _wealth_score(team.gdp_per_capita_usd),
-            "climate": _climate_score(team.avg_temp_c),
-            "host": 1.0 if team.is_host else 0.0,
-        }
-        score = sum(factors[name] * weights.get(name, 0.0) for name in factors)
+        if score_output.get("mode") == "tournament_minmax" and spread:
+            score = (raw[team.country] - min_score) / spread
+        elif score_output.get("mode") == "raw_divisor":
+            score = raw[team.country] / score_output["raw_score_divisor"]
+        else:
+            score = raw[team.country]
         normalized[team.country] = {
             "country": team.country,
             "score": round(score, 6),
-            "factors": {k: round(v, 6) for k, v in factors.items()},
-            "weights": weights,
+            "raw_score": round(raw[team.country], 6),
+            "factors": {k: round(v, 6) for k, v in term_map[team.country].items()},
+            "algorithm": {
+                "id": config["algorithm_id"],
+                "name": config["algorithm_name"],
+            },
         }
 
     return normalized
 
 
-def match_probability(team_a, team_b, weights=None):
+def match_probability(team_a, team_b, weights=None, config=None):
     if team_a.country == team_b.country:
         raise ValueError("Match simulations require two different country names.")
 
+    config = config or DEFAULT_CONFIG
     teams = [team_a, team_b]
-    normalized = normalize_teams(teams, weights)
+    normalized = normalize_teams(teams, weights, config)
     a_score = normalized[team_a.country]["score"]
     b_score = normalized[team_b.country]["score"]
-    probability = 1.0 / (1.0 + math.exp(-4.0 * (a_score - b_score)))
+    scale = config["match_probability"]["logistic_scale"]
+    probability = 1.0 / (1.0 + math.exp(-scale * (a_score - b_score)))
 
     return {
         "team_a": normalized[team_a.country],
         "team_b": normalized[team_b.country],
         "team_a_win_probability": round(probability, 6),
         "team_b_win_probability": round(1.0 - probability, 6),
-        "model_share": MODEL_SHARE,
-        "luck_share": LUCK_SHARE,
+        "model_share": config["deterministic_share"],
+        "luck_share": config["luck_share"],
+        "algorithm": {
+            "id": config["algorithm_id"],
+            "name": config["algorithm_name"],
+        },
     }
 
 
-def simulate_match(team_a_name, team_b_name, normalized, rng):
+def simulate_match(team_a_name, team_b_name, normalized, rng, config=None):
+    config = config or DEFAULT_CONFIG
     score_delta = normalized[team_a_name]["score"] - normalized[team_b_name]["score"]
-    luck = rng.gauss(0.0, LUCK_SHARE / 3.0)
-    outcome = (MODEL_SHARE * score_delta) + luck
+    luck = rng.gauss(0.0, config["luck_share"] / config["match_probability"]["luck_sigma_divisor"])
+    outcome = (config["deterministic_share"] * score_delta) + luck
     if outcome == 0:
         return team_a_name if rng.random() < 0.5 else team_b_name
     return team_a_name if outcome > 0 else team_b_name
@@ -106,12 +135,13 @@ def _validate_unique_countries(teams):
         raise ValueError("Team country names must be unique within a simulation.")
 
 
-def simulate_knockout_tournament(teams, simulations=10000, seed=None, weights=None):
+def simulate_knockout_tournament(teams, simulations=10000, seed=None, weights=None, config=None):
+    config = config or DEFAULT_CONFIG
     _validate_knockout_size(len(teams))
     _validate_unique_countries(teams)
 
     rng = random.Random(seed)
-    normalized = normalize_teams(teams, weights)
+    normalized = normalize_teams(teams, weights, config)
     starting_bracket = [team.country for team in teams]
     titles = Counter()
     finals = Counter()
@@ -122,7 +152,7 @@ def simulate_knockout_tournament(teams, simulations=10000, seed=None, weights=No
         while len(round_teams) > 1:
             winners = []
             for i in range(0, len(round_teams), 2):
-                winner = simulate_match(round_teams[i], round_teams[i + 1], normalized, rng)
+                winner = simulate_match(round_teams[i], round_teams[i + 1], normalized, rng, config)
                 winners.append(winner)
 
             if len(round_teams) == 4:
@@ -142,8 +172,12 @@ def simulate_knockout_tournament(teams, simulations=10000, seed=None, weights=No
     return {
         "simulations": simulations,
         "seed": seed,
-        "model_share": MODEL_SHARE,
-        "luck_share": LUCK_SHARE,
+        "model_share": config["deterministic_share"],
+        "luck_share": config["luck_share"],
+        "algorithm": {
+            "id": config["algorithm_id"],
+            "name": config["algorithm_name"],
+        },
         "bracket_order": starting_bracket,
         "champion_odds": champion_odds,
         "final_odds": _stage_odds(finals, simulations),

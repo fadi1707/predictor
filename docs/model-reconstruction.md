@@ -119,6 +119,58 @@ with the luck variance calibrated so the deterministic model explains roughly
 
 5. Aggregate simulation results as title probabilities.
 
+## Repository Implementation
+
+The reconstruction is implemented as a configurable algorithm rather than a
+hard-coded formula.
+
+```text
+data/klement_algorithm_config.json
+```
+
+This file stores:
+
+- Hoffmann/Ging/Ramasamy coefficients.
+- FIFA-form coefficient/transform settings.
+- World population denominator for population share.
+- Deterministic/luck shares.
+- Logistic match-probability scale.
+- Draw band.
+
+The current implementation uses:
+
+```text
+base_strength_i =
+    intercept
+  + b_gdp * GDPpc_i
+  + b_gdp2 * GDPpc_i^2
+  + b_temp * (TEMP_i - 14)^2
+  + b_host * HOST_i
+  + b_pop * FOOTBALL_POPULARITY_i * POP_SHARE_i
+  + b_rank * FIFA_RANK_SCORE_i
+  + b_points * FIFA_POINTS_i
+```
+
+Then raw strengths are scaled by the configurable `raw_score_divisor` before
+match probabilities are computed. This avoids a single-match normalization bug
+where comparing only two teams would force one team to 0 and the other to 1.
+If a future calibration works better with tournament min-max scaling, set
+`score_output.mode` to `tournament_minmax`.
+
+Team-level values live in:
+
+```text
+data/fwc26_model_inputs.json
+```
+
+The JSON supports an optional sixth value for FIFA ranking points:
+
+```text
+"NED": [gdp_per_capita_usd, population, football_popularity, avg_temp_c, fifa_rank, fifa_points]
+```
+
+If FIFA points are not present, the model uses the rank-score term only.
+
 ## What We Need To Recover The Exact Klement Model
 
 One of the following is required:

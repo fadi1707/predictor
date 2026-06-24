@@ -61,6 +61,7 @@ def create_schema(conn):
             football_popularity REAL,
             avg_temp_c REAL,
             fifa_rank INTEGER,
+            fifa_points REAL,
             is_host INTEGER NOT NULL DEFAULT 0,
             UNIQUE(tournament_id, fifa_code)
         );
@@ -97,6 +98,7 @@ def create_schema(conn):
             football_popularity,
             avg_temp_c,
             fifa_rank,
+            fifa_points,
             is_host
         FROM teams;
         """
@@ -146,8 +148,8 @@ def insert_teams(conn, seed, model_inputs):
                 INSERT INTO teams(
                     tournament_id, country, fifa_code, group_letter, group_position,
                     gdp_per_capita_usd, population, football_popularity, avg_temp_c,
-                    fifa_rank, is_host
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    fifa_rank, fifa_points, is_host
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     tournament_id,
@@ -160,6 +162,7 @@ def insert_teams(conn, seed, model_inputs):
                     inputs[2],
                     inputs[3],
                     inputs[4],
+                    inputs[5] if len(inputs) > 5 else None,
                     is_host,
                 ),
             )

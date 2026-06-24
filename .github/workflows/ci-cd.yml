@@ -47,6 +47,7 @@ jobs:
           python - <<'PY'
           import sqlite3
           from app.fwc26_predictor import predict_fwc26_winner
+          from app.klement_model import load_algorithm_config
           from app.klement_model import match_probability
           from app.models import KlementTeam
 
@@ -54,7 +55,12 @@ jobs:
           assert conn.execute("select count(*) from teams").fetchone()[0] == 48
           assert conn.execute("select count(*) from matches").fetchone()[0] == 104
           assert conn.execute("select count(*) from teams where fifa_rank is null").fetchone()[0] == 0
+          columns = [row[1] for row in conn.execute("pragma table_info(teams)")]
+          assert "fifa_points" in columns
           conn.close()
+
+          config = load_algorithm_config()
+          assert config["algorithm_id"] == "klement_reconstruction_public_v1"
 
           team_a = KlementTeam(country="Argentina", gdp_per_capita_usd=13730, population=45800000, football_popularity=0.9, avg_temp_c=14.8, fifa_rank=1)
           team_b = KlementTeam(country="France", gdp_per_capita_usd=44400, population=68200000, football_popularity=0.75, avg_temp_c=11.7, fifa_rank=2)

@@ -26,6 +26,7 @@ class KlementTeam(BaseModel):
     football_popularity: float = Field(ge=0, le=1)
     avg_temp_c: float
     fifa_rank: int = Field(ge=1)
+    fifa_points: float | None = Field(default=None, gt=0)
     is_host: bool = False
 
 class KlementMatchRequest(BaseModel):
