@@ -36,3 +36,7 @@ class KlementTournamentRequest(BaseModel):
     teams: list[KlementTeam] = Field(min_length=2)
     simulations: int = Field(default=10000, ge=1, le=100000)
     seed: int | None = None
+
+class FWC26WinnerRequest(BaseModel):
+    simulations: int = Field(default=10000, ge=1, le=100000)
+    seed: int | None = None

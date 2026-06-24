@@ -39,6 +39,8 @@ http://127.0.0.1:8080/
 ```text
 POST /api/klement/match
 POST /api/klement/tournament
+GET  /api/klement/fwc26/winner
+POST /api/klement/fwc26/winner
 GET  /api/health/local
 ```
 
@@ -76,8 +78,18 @@ python scripts/build_klement_db.py
 
 The DB contains 48 teams, 12 groups, 72 group-stage matches, and 104 total
 matches including knockout placeholders. Model input columns such as GDP,
-population, temperature, and FIFA rank are nullable because the PDFs provide
-tournament structure, not economic or ranking data.
+population, temperature, and FIFA rank are populated from
+`data/fwc26_model_inputs.json`, which is a starter dataset for running the
+model end-to-end.
+
+Run the full seeded World Cup simulation from the DB:
+
+```bash
+curl "http://127.0.0.1:8080/api/klement/fwc26/winner?simulations=10000&seed=7"
+```
+
+The response includes the most probable winner, title odds, final appearance
+odds, and normalized model scores for every team.
 
 ## CI/CD
 

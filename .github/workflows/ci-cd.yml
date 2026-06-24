@@ -46,18 +46,23 @@ jobs:
         run: |
           python - <<'PY'
           import sqlite3
+          from app.fwc26_predictor import predict_fwc26_winner
           from app.klement_model import match_probability
           from app.models import KlementTeam
 
           conn = sqlite3.connect("data/klement_world_cup_2026.db")
           assert conn.execute("select count(*) from teams").fetchone()[0] == 48
           assert conn.execute("select count(*) from matches").fetchone()[0] == 104
+          assert conn.execute("select count(*) from teams where fifa_rank is null").fetchone()[0] == 0
           conn.close()
 
           team_a = KlementTeam(country="Argentina", gdp_per_capita_usd=13730, population=45800000, football_popularity=0.9, avg_temp_c=14.8, fifa_rank=1)
           team_b = KlementTeam(country="France", gdp_per_capita_usd=44400, population=68200000, football_popularity=0.75, avg_temp_c=11.7, fifa_rank=2)
           result = match_probability(team_a, team_b)
           assert 0 < result["team_a_win_probability"] < 1
+
+          winner = predict_fwc26_winner(simulations=25, seed=7)
+          assert winner["most_probable_winner"]
           PY
 
   package:

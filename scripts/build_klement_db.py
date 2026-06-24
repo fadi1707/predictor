@@ -7,6 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SEED = ROOT / "data" / "fwc26_seed.json"
+DEFAULT_MODEL_INPUTS = ROOT / "data" / "fwc26_model_inputs.json"
 DEFAULT_OUTPUT = ROOT / "data" / "klement_world_cup_2026.db"
 
 
@@ -134,20 +135,33 @@ def insert_sources(conn, seed):
         )
 
 
-def insert_teams(conn, seed):
+def insert_teams(conn, seed, model_inputs):
     tournament_id = seed["tournament"]["id"]
     for group_letter, teams in seed["groups"].items():
         for position, (country, code) in enumerate(teams, start=1):
             is_host = 1 if code in {"CAN", "MEX", "USA"} else 0
+            inputs = model_inputs.get(code, [None, None, None, None, None])
             conn.execute(
                 """
                 INSERT INTO teams(
                     tournament_id, country, fifa_code, group_letter, group_position,
                     gdp_per_capita_usd, population, football_popularity, avg_temp_c,
                     fifa_rank, is_host
-                ) VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, NULL, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                (tournament_id, country, code, group_letter, position, is_host),
+                (
+                    tournament_id,
+                    country,
+                    code,
+                    group_letter,
+                    position,
+                    inputs[0],
+                    inputs[1],
+                    inputs[2],
+                    inputs[3],
+                    inputs[4],
+                    is_host,
+                ),
             )
 
 
@@ -206,16 +220,18 @@ def insert_knockout_matches(conn, seed):
         )
 
 
-def build(seed_path, output_path):
+def build(seed_path, model_inputs_path, output_path):
     with open(seed_path, "r", encoding="utf-8") as handle:
         seed = json.load(handle)
+    with open(model_inputs_path, "r", encoding="utf-8") as handle:
+        model_inputs = json.load(handle)
 
     conn = connect(output_path)
     try:
         create_schema(conn)
         insert_tournament(conn, seed)
         insert_sources(conn, seed)
-        insert_teams(conn, seed)
+        insert_teams(conn, seed, model_inputs)
         insert_group_matches(conn, seed)
         insert_knockout_matches(conn, seed)
         conn.commit()
@@ -226,10 +242,11 @@ def build(seed_path, output_path):
 def main():
     parser = argparse.ArgumentParser(description="Build the Klement World Cup SQLite seed DB.")
     parser.add_argument("--seed", type=Path, default=DEFAULT_SEED)
+    parser.add_argument("--model-inputs", type=Path, default=DEFAULT_MODEL_INPUTS)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
 
-    build(args.seed, args.output)
+    build(args.seed, args.model_inputs, args.output)
     print(f"Built {args.output}")
 
 
