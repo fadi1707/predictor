@@ -41,6 +41,7 @@ POST /api/klement/tournament
 GET  /api/klement/fwc26/winner
 POST /api/klement/fwc26/winner
 GET  /api/klement/model/config
+GET  /api/klement/model/calibration
 GET  /api/health/local
 ```
 
@@ -94,6 +95,18 @@ Run the separate approximation/simulation mode from the DB:
 curl "http://127.0.0.1:8080/api/klement/fwc26/winner?mode=simulation&simulations=10000&seed=7"
 ```
 
+Run the inverse-fitted calibration mode:
+
+```bash
+curl "http://127.0.0.1:8080/api/klement/fwc26/winner?mode=calibrated&simulations=10000&seed=7"
+```
+
+Inspect the calibration report:
+
+```bash
+curl "http://127.0.0.1:8080/api/klement/model/calibration"
+```
+
 ## CI/CD
 
 Artifact versioning is configured in:
@@ -134,6 +147,23 @@ ranking, FIFA points, or football-culture inputs change. Then rebuild:
 ```bash
 python scripts/build_klement_db.py
 ```
+
+Generate a calibrated reconstruction fitted to Klement's published 2026 output
+targets:
+
+```bash
+python scripts/calibrate_klement_model.py --candidates 1000 --simulations 500 --seed 2029
+```
+
+This writes:
+
+```text
+data/klement_algorithm_config.calibrated.json
+data/klement_calibration_report.json
+```
+
+The calibrated file is an inverse fit to published outputs, not proof of
+Klement's private formula.
 
 Inspect the active algorithm:
 

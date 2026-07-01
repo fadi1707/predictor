@@ -37,6 +37,8 @@ def _raw_strength(team, config):
     fifa_rank_score = _fifa_rank_score(team.fifa_rank, config)
     fifa_points = team.fifa_points or 0.0
     culture_population = team.football_popularity * _population_share(team, config)
+    host_multipliers = transforms.get("host_country_multipliers", {})
+    host_multiplier = host_multipliers.get(team.country, 1.0)
 
     terms = {
         "intercept": coefficients["intercept"],
@@ -44,7 +46,7 @@ def _raw_strength(team, config):
         "gdp_per_capita_squared": coefficients["gdp_per_capita_squared"] * (team.gdp_per_capita_usd**2),
         "temperature_deviation_squared": coefficients["temperature_deviation_squared"]
         * ((team.avg_temp_c - temp_target) ** 2),
-        "host": coefficients["host"] * (1.0 if team.is_host else 0.0),
+        "host": coefficients["host"] * (host_multiplier if team.is_host else 0.0),
         "football_culture_population_share": coefficients["football_culture_population_share"] * culture_population,
         "fifa_rank_score": coefficients["fifa_rank_score"] * fifa_rank_score,
         "fifa_points": coefficients["fifa_points"] * fifa_points,

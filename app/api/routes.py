@@ -5,6 +5,7 @@ from app.execution import run_on_target
 from app.inventory import discover_target, health_model
 from app.job_engine import process_job, resume_job_from_approval
 from app.fwc26_predictor import predict_fwc26_winner
+from app.klement_calibration import load_calibrated_config, load_calibration_report
 from app.klement_model import load_algorithm_config, match_probability, simulate_knockout_tournament
 from app.klement_published_forecast import load_klement_2026_forecast
 from app.models import *
@@ -123,15 +124,20 @@ def klement_tournament(req: KlementTournamentRequest):
 def klement_model_config():
     return load_algorithm_config()
 
+@router.get("/api/klement/model/calibration")
+def klement_model_calibration():
+    return load_calibration_report()
+
 @router.get("/api/klement/fwc26/winner")
 def klement_fwc26_winner(mode: str = "published", simulations: int = 10000, seed: int | None = None):
     try:
         if mode == "published":
             return load_klement_2026_forecast()
-        if mode != "simulation":
-            raise ValueError("mode must be 'published' or 'simulation'")
+        if mode not in ("simulation", "calibrated"):
+            raise ValueError("mode must be 'published', 'simulation', or 'calibrated'")
         req = FWC26WinnerRequest(simulations=simulations, seed=seed)
-        return predict_fwc26_winner(req.simulations, req.seed)
+        config = load_calibrated_config() if mode == "calibrated" else None
+        return predict_fwc26_winner(req.simulations, req.seed, config=config)
     except ValueError as exc:
         raise HTTPException(400, str(exc))
 
@@ -140,7 +146,8 @@ def klement_fwc26_winner_post(req: FWC26WinnerRequest):
     try:
         if req.mode == "published":
             return load_klement_2026_forecast()
-        return predict_fwc26_winner(req.simulations, req.seed)
+        config = load_calibrated_config() if req.mode == "calibrated" else None
+        return predict_fwc26_winner(req.simulations, req.seed, config=config)
     except ValueError as exc:
         raise HTTPException(400, str(exc))
 

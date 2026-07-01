@@ -33,6 +33,7 @@
     "fifa_member_count": 211,
     "population_share_mode": "world_population",
     "football_culture_proxy": "football_popularity",
-    "fifa_points_fallback": "rank_score"
+    "fifa_points_fallback": "rank_score",
+    "host_country_multipliers": {}
   }
 }

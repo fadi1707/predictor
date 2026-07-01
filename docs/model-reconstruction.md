@@ -183,3 +183,24 @@ One of the following is required:
 The 2026 PDF gives group advancement percentages and a deterministic-looking
 knockout path. Those outputs can be used to calibrate an approximation, but not
 to prove the private equations exactly.
+
+## Inverse-Fit Calibration
+
+The repository includes a calibration script:
+
+```text
+scripts/calibrate_klement_model.py
+```
+
+It searches coefficient/config combinations and writes:
+
+```text
+data/klement_algorithm_config.calibrated.json
+data/klement_calibration_report.json
+```
+
+The objective combines the published group top-two probabilities with the
+published knockout winner path. The generated config is available through
+`mode=calibrated`, but it remains an inverse-fitted approximation. It should be
+recalibrated whenever better published targets, country inputs, or real
+coefficient disclosures become available.

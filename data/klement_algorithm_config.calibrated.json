@@ -1,0 +1,52 @@
+{
+  "algorithm_id": "klement_inverse_fit_public_targets_v1",
+  "algorithm_name": "Klement inverse fit from published 2026 targets",
+  "description": "Inverse-fitted reconstruction calibrated against Klement's published 2026 advancement probabilities. This is not Klement's private formula.",
+  "sources": [
+    "source_pdfs/strategy-fifa-world-cup-predictions-2026.pdf",
+    "Hoffmann, Ging, Ramasamy (2002), The Socio-Economic Determinants of International Soccer Performance"
+  ],
+  "score_output": {
+    "mode": "raw_divisor",
+    "raw_score_divisor": 710.2340625942886
+  },
+  "world_population": 8100000000,
+  "deterministic_share": 0.55,
+  "luck_share": 0.45,
+  "match_probability": {
+    "logistic_scale": 4.0,
+    "draw_band": 0.06164076343520272,
+    "luck_sigma_divisor": 3.8667894651088157
+  },
+  "coefficients": {
+    "intercept": 492.5865,
+    "gdp_per_capita": 0.013245287282311233,
+    "gdp_per_capita_squared": -1.2268730974917333e-07,
+    "temperature_deviation_squared": -0.4737142260615185,
+    "host": 114.98887502922574,
+    "football_culture_population_share": 5761.627295934275,
+    "fifa_rank_score": 603.6856064483111,
+    "fifa_points": 0.0
+  },
+  "transforms": {
+    "temperature_target_c": 14.0,
+    "fifa_member_count": 211,
+    "population_share_mode": "world_population",
+    "football_culture_proxy": "football_popularity",
+    "fifa_points_fallback": "rank_score",
+    "host_country_multipliers": {
+      "United States": 0.14409634668838917,
+      "Canada": 0.08751438381602465,
+      "Mexico": 0.3568133507142323
+    }
+  },
+  "calibration": {
+    "method": "random_search_against_published_top_two_group_probabilities",
+    "candidate_count": 1500,
+    "simulations_per_candidate": 500,
+    "seed": 2029,
+    "target_count": 32,
+    "knockout_target_count": 31,
+    "objective": "minimize group top-two error plus weighted knockout-path error"
+  }
+}

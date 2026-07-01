@@ -39,6 +39,6 @@ class KlementTournamentRequest(BaseModel):
     seed: int | None = None
 
 class FWC26WinnerRequest(BaseModel):
-    mode: Literal["published", "simulation"] = "published"
+    mode: Literal["published", "simulation", "calibrated"] = "published"
     simulations: int = Field(default=10000, ge=1, le=100000)
     seed: int | None = None

@@ -6,3 +6,4 @@ python-dotenv>=1.0.1
 PyYAML>=6.0.2
 paramiko>=3.4.1
 psutil>=6.0.0
+pytest>=8.3.0
